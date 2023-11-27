@@ -286,7 +286,7 @@ namespace lights {
                 BitKit.setMotormoduleSpeed(-255, 255)
                 basic.pause(80)
                 BitKit.setMotormoduleSpeed(255, -255)
-                basic.pause(80 - 0.4 * grid.fcal)
+                basic.pause(80)
             }
             lights.clearAll()
             for (let index = 0; index < 5; index++) {
@@ -300,7 +300,7 @@ namespace lights {
                 BitKit.setMotormoduleSpeed(-255, 255)
                 basic.pause(80)
                 BitKit.setMotormoduleSpeed(255, -255)
-                basic.pause(80 - 0.4 * grid.fcal)
+                basic.pause(80)
             }
         }
         BitKit.stopMotormodule()
