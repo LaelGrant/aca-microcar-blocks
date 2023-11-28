@@ -22,7 +22,7 @@ namespace grid {
         let rw, lw, rw2, lw2 = 0;
         if (direction == 2){ //right
             lw = 200;
-            rw = 60; //shrunk cos most robots are worse at turning right
+            rw = 65; //changed from 60 t0 65 to fix underturning & missing line
             lw2 = 200;
             rw2 = 0;
         }
@@ -49,8 +49,8 @@ namespace grid {
             BitKit.setMotormoduleSpeed(200,200); //move blindly forwards for a bit
             basic.pause(900); //upped from 800 to suit gina
         }
-        BitKit.setMotormoduleSpeed(0, 0);
-        basic.pause(600)
+        //BitKit.setMotormoduleSpeed(0, 0); //removed to allow better PRIMM for students (no stopping in their code). 
+        //basic.pause(600)
     }
     /**
     * Follow line
@@ -75,8 +75,8 @@ namespace grid {
                 BitKit.setMotormoduleAction(DirectionTpye.Left, SpeedTpye.Medium)
             }
         }
-        BitKit.stopMotormodule()
-        basic.pause(500)
+        //BitKit.stopMotormodule()
+        //basic.pause(500)
     }
 }
 
