@@ -267,6 +267,7 @@ namespace BitKit {
         return false;
     }
 
+
     /**
      * Get the color value from the color sensor in R:G:B.
      */
@@ -308,15 +309,15 @@ namespace BitKit {
         h *= 60
         if (h < 0) h += 360 //fix wrap around
 
-        if (s > 0.3 && l > 0.2 && l < 0.95) { //don't bother if it's too grey or black
+        if (s > 0.3 && l > 0.15 && l < 0.95) { //don't bother if it's too grey or black
             switch (colour) {
                 case CustomColours.R:
-                    if (h > 350 || h < 17 && l < 0.85 && s > 0.7) {
+                    if (h > 350 || h < 17 && l < 0.85 && s > 0.78) { //saturation high to prevent map bg being detected
                         return true;
                     }
                     return false;
                 case CustomColours.G:
-                    if (h > 80 && h < 160) {
+                    if (h > 77 && h < 160) {
                         return true;
                     }
                     return false;
@@ -342,4 +343,7 @@ namespace BitKit {
         }
         return false;
     }
+
+
+
 }

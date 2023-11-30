@@ -35,7 +35,7 @@ namespace grid {
         
         if (direction !=3){ //if turning
             
-            BitKit.setMotormoduleSpeed(lw, rw); //move blindly
+            BitKit.setMotormoduleSpeed(lw, rw); //drive forwards in a turn to clear dot
             basic.pause(500);
             driver.i2cSendByte(SensorType.Liner, 0x02);
             let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
@@ -46,7 +46,7 @@ namespace grid {
 
         }
         else { //if straight
-            BitKit.setMotormoduleSpeed(200,200); //move blindly forwards for a bit
+            BitKit.setMotormoduleSpeed(200,200); //move forwards to clear dot
             basic.pause(900); //upped from 800 to suit gina
         }
         //BitKit.setMotormoduleSpeed(0, 0); //removed to allow better PRIMM for students (no stopping in their code). 
@@ -59,9 +59,7 @@ namespace grid {
     //% block="follow line until dot"
     //% group="Grid"
     export function line_follow () {
-        //blindly forward a bit to start
-        BitKit.setMotormoduleAction(DirectionTpye.Forward, SpeedTpye.Medium)
-        //basic.pause(700) //blindy go forward to get past dot
+
         while (!(BitKit.wasAllLinePosTriggered())) {
             if (BitKit.wasLinePositionTriggered(LinerEvent.Middle)) {
                 BitKit.setMotormoduleAction(DirectionTpye.Forward, SpeedTpye.Medium)
@@ -75,8 +73,12 @@ namespace grid {
                 BitKit.setMotormoduleAction(DirectionTpye.Left, SpeedTpye.Medium)
             }
         }
-        //BitKit.stopMotormodule()
-        //basic.pause(500)
+        if (BitKit.wasAllLinePosTriggered()) {
+            BitKit.setMotormoduleAction(DirectionTpye.Forward, SpeedTpye.Medium)
+            basic.pause(200) //found dot, move closer to center (technically, lost line - TODO, change check here)
+            BitKit.stopMotormodule()
+            basic.pause(500) //stop briefly to indicate found dot
+        }
     }
 }
 
