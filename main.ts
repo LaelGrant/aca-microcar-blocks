@@ -1,5 +1,5 @@
-enum LeftorRight {
-    //straight = 3,
+enum DirectionNames {
+    straight = 3,
     left = 1,
     right = 2,
 };
@@ -13,30 +13,55 @@ namespace grid {
     let strip: newopixel.Strip = null //make strip
 
     /**
-    * Turn Right/Left until line
+    * Go Straight/Right/Left until line
     */
     //% weight=96
     //% block="go |%direction| until line"
     //% group="Grid"
-    export function turnUntilLine(direction: LeftorRight) {
+    export function turnUntilLine(direction: DirectionNames) {
         let rw, lw = 0;
         if (direction == 2){ //right
             lw = 200;
-            rw = 65; //changed from 60 t0 65 to fix underturning & missing line
+            rw = 70; //changed from 60 t0 65 to fix underturning & missing line
         }
         else if (direction == 1){ //left
-            lw = 65;
+            lw = 70;
             rw = 200;
         }
 
-        BitKit.setMotormoduleSpeed(lw, rw); //drive forwards in a turn to clear dot
-        basic.pause(500);
-        driver.i2cSendByte(SensorType.Liner, 0x02);
-        let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
-        while (event != LinerEvent.Middle) {
+        if(direction == 3) { //going straight
+            let foundLine = false;
+            while (!foundLine){ 
+                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)
+                if (!foundLine) {
+                    foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Left)
+                }
+                if (!foundLine) {
+                    foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Middle)
+                }
+                if (!foundLine) {
+                    foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Right)
+                }
+                if (!foundLine) {
+                    foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Rightmost)
+                }
+                if (!foundLine) { 
+                    BitKit.setMotormoduleSpeed(200,200); //move forwards to clear dot
+                    basic.pause(100); //upped from 800 to suit gina
+                }
+            }
+        }   
+        else {  //turning
+            BitKit.setMotormoduleSpeed(lw, rw); //drive forwards in a turn to clear dot
+            basic.pause(500);
             driver.i2cSendByte(SensorType.Liner, 0x02);
-            event = driver.i2cReceiveByte(SensorType.Liner);
+            let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
+            while (event != LinerEvent.Middle) {
+                driver.i2cSendByte(SensorType.Liner, 0x02);
+                event = driver.i2cReceiveByte(SensorType.Liner);
+            }
         }
+
     }
 
     /**
@@ -90,8 +115,8 @@ namespace grid {
             }
         }
         if (BitKit.wasAllLinePosTriggered()) {
-            BitKit.setMotormoduleAction(DirectionTpye.Forward, SpeedTpye.Medium)
-            basic.pause(200) //found dot, move closer to center (technically, lost line - TODO, change check here)
+            //BitKit.setMotormoduleAction(DirectionTpye.Forward, SpeedTpye.Medium)
+            //basic.pause(200) //found dot, move closer to center (technically, lost line - TODO, change check here)
             BitKit.stopMotormodule()
             basic.pause(500) //stop briefly to indicate found dot
         }
