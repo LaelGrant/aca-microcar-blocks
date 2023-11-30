@@ -52,10 +52,40 @@ namespace grid {
         //BitKit.setMotormoduleSpeed(0, 0); //removed to allow better PRIMM for students (no stopping in their code). 
         //basic.pause(600)
     }
+
+    /**
+    * Continue Straight (over dot) until any line found
+    */
+    //% weight=95
+    //% block="go straight over dot"
+    //% group="Grid"
+    export function goOverDot() {
+        let foundLine = false;
+        while (!foundLine){ 
+            foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)
+            if (!foundLine) {
+                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Left)
+            }
+            if (!foundLine) {
+                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Middle)
+            }
+            if (!foundLine) {
+                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Right)
+            }
+            if (!foundLine) {
+                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Rightmost)
+            }
+            if (!foundLine) { 
+                BitKit.setMotormoduleSpeed(200,200); //move forwards to clear dot
+                basic.pause(100); //upped from 800 to suit gina
+            }
+        }
+    }
+
     /**
     * Follow line
     */
-    //% weight=95
+    //% weight=94
     //% block="follow line until dot"
     //% group="Grid"
     export function line_follow () {
