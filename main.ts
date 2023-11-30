@@ -1,5 +1,5 @@
 enum LeftorRight {
-    straight = 3,
+    //straight = 3,
     left = 1,
     right = 2,
 };
@@ -16,41 +16,27 @@ namespace grid {
     * Turn Right/Left until line
     */
     //% weight=96
-    //% block="go |%direction|"
+    //% block="go |%direction| until line"
     //% group="Grid"
     export function turnUntilLine(direction: LeftorRight) {
-        let rw, lw, rw2, lw2 = 0;
+        let rw, lw = 0;
         if (direction == 2){ //right
             lw = 200;
             rw = 65; //changed from 60 t0 65 to fix underturning & missing line
-            lw2 = 200;
-            rw2 = 0;
         }
         else if (direction == 1){ //left
             lw = 65;
             rw = 200;
-            lw2 = 0;
-            rw2 = 200;
         }
-        
-        if (direction !=3){ //if turning
-            
-            BitKit.setMotormoduleSpeed(lw, rw); //drive forwards in a turn to clear dot
-            basic.pause(500);
-            driver.i2cSendByte(SensorType.Liner, 0x02);
-            let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
-            while (event != LinerEvent.Middle) {
-                driver.i2cSendByte(SensorType.Liner, 0x02);
-                event = driver.i2cReceiveByte(SensorType.Liner);
-            }
 
+        BitKit.setMotormoduleSpeed(lw, rw); //drive forwards in a turn to clear dot
+        basic.pause(500);
+        driver.i2cSendByte(SensorType.Liner, 0x02);
+        let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
+        while (event != LinerEvent.Middle) {
+            driver.i2cSendByte(SensorType.Liner, 0x02);
+            event = driver.i2cReceiveByte(SensorType.Liner);
         }
-        else { //if straight
-            BitKit.setMotormoduleSpeed(200,200); //move forwards to clear dot
-            basic.pause(900); //upped from 800 to suit gina
-        }
-        //BitKit.setMotormoduleSpeed(0, 0); //removed to allow better PRIMM for students (no stopping in their code). 
-        //basic.pause(600)
     }
 
     /**
