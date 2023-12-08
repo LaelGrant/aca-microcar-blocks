@@ -20,16 +20,28 @@ namespace grid {
     //% group="Grid"
     export function turnUntilLine(direction: DirectionNames) {
         let rw, lw = 0;
-        if (direction == 2){ //right
-            lw = 200;
-            rw = 70; //changed from 60 t0 65 to fix underturning & missing line
-        }
-        else if (direction == 1){ //left
-            lw = 70;
+
+        if (direction == 1){ //left
+            BitKit.setMotormoduleSpeed(200, 200);
+            basic.pause(150);
+            lw = 65;
             rw = 200;
+            while (!BitKit.wasLinePositionTriggered(LinerEvent.Middle)) { //testing
+                BitKit.setMotormoduleSpeed(lw, rw);
+            }
         }
 
-        if(direction == 3) { //going straight
+        else if (direction == 2){ //right
+            BitKit.setMotormoduleSpeed(200, 200);
+            basic.pause(150);
+            lw = 200;
+            rw = 65; //changed from 60 t0 65 to fix underturning & missing line
+            while (!BitKit.wasLinePositionTriggered(LinerEvent.Middle)) { //testing
+                BitKit.setMotormoduleSpeed(lw, rw);
+            }
+        }
+
+        else if(direction == 3) { //going straight
             let foundLine = false;
             while (!foundLine){ 
                 foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)
@@ -47,7 +59,7 @@ namespace grid {
                 }
                 if (!foundLine) { 
                     BitKit.setMotormoduleSpeed(200,200); //move forwards to clear dot
-                    basic.pause(100); //upped from 800 to suit gina
+                    basic.pause(100); //check all lines every 100ms movement
                 }
             }
         }   

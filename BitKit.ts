@@ -294,6 +294,7 @@ namespace BitKit {
         let b = col & 0xFF
 
         basic.pause(1)
+        //colour conversion to HSL
         //adapted from https://gist.github.com/vahidk/05184faf3d92a0aa1b46aeaa93b07786
         r /= 255; g /= 255; b /= 255;
         let max = Math.max(Math.max(r, g), b);
@@ -309,6 +310,7 @@ namespace BitKit {
         h *= 60
         if (h < 0) h += 360 //fix wrap around
 
+        //colour identification
         if (s > 0.3 && l > 0.15 && l < 0.95) { //don't bother if it's too grey or black
             switch (colour) {
                 case CustomColours.R:
