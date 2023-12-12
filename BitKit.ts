@@ -26,6 +26,10 @@ enum ColorEvent {
 enum CustomColours { //made by Penny
     //%block=red
     R,
+    //%block=orange
+    O,
+    //%block=yellow
+    Y,
     //%block=green
     G,
     //%block=blue
@@ -268,6 +272,7 @@ namespace BitKit {
     }
 
 
+
     /**
      * Get the color value from the color sensor in R:G:B.
      */
@@ -285,6 +290,7 @@ namespace BitKit {
      * Check if the colour sensor detected a colour
      */
     //%blockId=i2c block="see colour |%colour|"
+    //% weight=96
     //% group="Colour Sensor"
     export function seeCustom(colour: CustomColours): boolean {
         //separate colour channels
@@ -314,7 +320,7 @@ namespace BitKit {
         if (s > 0.3 && l > 0.15 && l < 0.95) { //don't bother if it's too grey or black
             switch (colour) {
                 case CustomColours.R:
-                    if (h > 350 || h < 17 && l < 0.85 && s > 0.78) { //saturation high to prevent map bg being detected
+                    if (h > 350 || h < 17 && l < 0.85 && s > 0.81) { //saturation high to prevent map bg being detected
                         return true;
                     }
                     return false;
@@ -346,6 +352,92 @@ namespace BitKit {
         return false;
     }
 
+
+    let lastDetectedColour = -1
+    let colDetectionFreq = 0
+
+    /**
+     * Check if the colour sensor detected a colour
+     */
+    //%blockId=i2c_db block="see colour db |%colour|"
+    //% weight=96
+    //% group="Colour Sensor"
+
+    export function seeCustomDebounced(colour: CustomColours): boolean {
+        let detectedColour = -1
+        let colDetThreshold = 6
+        
+        //separate colour channels
+        let col = getColor()
+        let r = col >>> 16
+        let g = (col & 0xFF00) >>> 8
+        let b = col & 0xFF
+
+        //basic.pause(1)
+        //colour conversion to HSL
+        //adapted from https://gist.github.com/vahidk/05184faf3d92a0aa1b46aeaa93b07786
+        r /= 255; g /= 255; b /= 255;
+        let max = Math.max(Math.max(r, g), b);
+        let min = Math.min(Math.min(r, g), b);
+        let d = max - min;
+        let h;
+        if (d === 0) h = 0;
+        else if (max === r) h = (g - b) / d % 6;
+        else if (max === g) h = (b - r) / d + 2;
+        else if (max === b) h = (r - g) / d + 4;
+        let l = (min + max) / 2;
+        let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+        h *= 60
+        if (h < 0) h += 360 //fix wrap around
+
+        //colour identification
+        if (s > 0.3 && l > 0.15 && l < 0.95) { //don't bother if it's too grey or black
+            if (h > 350 || h < 12 && l < 0.85 && s > 0.78) { //saturation high to prevent map bg being detected
+                detectedColour = CustomColours.R;
+            }
+            if (h > 12 && h < 36 && l > 0.5 && s > 0.9) { //saturation high to prevent map bg being detected
+                detectedColour = CustomColours.O;
+            }
+            if (h > 35 && h < 63) { //
+                detectedColour = CustomColours.Y;
+            }
+            if (h > 63 && h < 160) {
+                detectedColour = CustomColours.G;
+            }
+            if (h > 160 && h < 265 && l < 0.85) { //blue bluer than red, green fires high
+                detectedColour = CustomColours.B;
+            }
+            if (h > 265 && h < 350 && l < 0.85) { // both red and blue more than green by a bit
+                detectedColour = CustomColours.P;
+            }
+        }
+        //separate bit for white
+        else if (colour == CustomColours.W && col > 16759431) { //almost white (FFBA87), might need to lower Rval
+            detectedColour = CustomColours.W;
+        }
+        //separate bit for black 
+        else if(s < 0.1 || l < 0.1){
+        //else if (colour == CustomColours.Bl && r * 255 < 0x10 && g * 255 < 0x10 && b * 255 < 0x10) {//all low light
+            detectedColour = CustomColours.Bl;
+        }
+        //Debounce colour detection
+        if(detectedColour == lastDetectedColour){
+            colDetectionFreq += 1;
+            if (colDetectionFreq > colDetThreshold && detectedColour == colour ) {
+                return true
+            }
+            else {
+                return false
+            }
+        }
+        else
+        {
+            colDetectionFreq = 0
+            lastDetectedColour = detectedColour
+            return false
+        }
+
+    }
 
 
 }
