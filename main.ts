@@ -22,26 +22,46 @@ namespace grid {
         let rw, lw = 0;
 
         if (direction == 1){ //left
-            lw = 50;
+            lw = 55;
             rw = 200;
+            BitKit.setMotormoduleSpeed(200, 200);
+            basic.pause(300);
+            while (!BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)){ //least overlap with outside white/colour overlap
+                BitKit.setMotormoduleSpeed(lw , rw);
+            }
+            while (!BitKit.wasLinePositionTriggered(LinerEvent.Middle)){  //bring it back to center now middle is on white
+                BitKit.setMotormoduleSpeed(lw , rw);
+            }
+            basic.pause(50)
+            BitKit.setMotormoduleSpeed(200, 200); //stop turning - necessary as line event only triggers on change, so otherwise line following continues until it adjusts... 
         }
 
         if (direction == 2){ //right
             lw = 200;
-            rw = 50;
-        }
-
-        if (direction != 3) {
+            rw = 55;
             BitKit.setMotormoduleSpeed(200, 200);
             basic.pause(300);
-            BitKit.setMotormoduleSpeed(lw, rw);
-            driver.i2cSendByte(SensorType.Liner, 0x02);
-            let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
-            while (event != LinerEvent.Middle) {
-                driver.i2cSendByte(SensorType.Liner, 0x02);
-                event = driver.i2cReceiveByte(SensorType.Liner);
+            while (!BitKit.wasLinePositionTriggered(LinerEvent.Rightmost)){
+                BitKit.setMotormoduleSpeed(lw , rw);
             }
+            while (!BitKit.wasLinePositionTriggered(LinerEvent.Middle)){
+                BitKit.setMotormoduleSpeed(lw , rw);
+            }
+            basic.pause(50)
+            BitKit.setMotormoduleSpeed(200, 200); //stop turning
         }
+
+        //if (direction != 3) {
+        //    BitKit.setMotormoduleSpeed(200, 200);
+        //    basic.pause(300);
+        //    BitKit.setMotormoduleSpeed(lw, rw);
+        //    driver.i2cSendByte(SensorType.Liner, 0x02);
+        //    let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
+        //    while (event != LinerEvent.Middle) {
+        //        driver.i2cSendByte(SensorType.Liner, 0x02);
+        //        event = driver.i2cReceiveByte(SensorType.Liner);
+        //    }
+        //}
 
         else if(direction == 3) { //going straight
             let foundLine = false;

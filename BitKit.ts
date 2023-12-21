@@ -237,7 +237,7 @@ namespace BitKit {
     //% weight=98
     //% group="Line Sensor"
     export function wasLinePositionTriggered(position: LinerEvent): boolean {
-        //basic.pause(1) //give event a chance to trigger
+        basic.pause(1) //give event a chance to trigger
         let eventValue = position;
         if (!initLiner) onLinePosition(position, () => { });
         if (lastLiner == eventValue) return true;
