@@ -95,6 +95,7 @@ enum MotionTpye {
     Auto = 1
 };
 
+
 /**
  * Extension blocks
  */
@@ -236,13 +237,13 @@ namespace BitKit {
     //% weight=98
     //% group="Line Sensor"
     export function wasLinePositionTriggered(position: LinerEvent): boolean {
-        basic.pause(1) //give event a chance to trigger
+        //basic.pause(1) //give event a chance to trigger
         let eventValue = position;
         if (!initLiner) onLinePosition(position, () => { });
         if (lastLiner == eventValue) return true;
         return false;
     }
-
+    
     /**
      * If line sensor is lost
      */
@@ -251,7 +252,7 @@ namespace BitKit {
     //% group="Line Sensor"
     export function wasAllLinePosTriggered(): boolean {
         basic.pause(1) //give event a chance to trigger
-        driver.i2cSendByte(SensorType.Liner, 0x02); //manually do lost trigger
+        driver.i2cSendByte(SensorType.Liner, 0x02); //manually check lost trigger
         let e = driver.i2cReceiveByte(SensorType.Liner);
         //basic.showNumber(e)
         if (e == 2) return true;
@@ -352,6 +353,31 @@ namespace BitKit {
         return false;
     }
 
+    //red, orange, yellow, green, blue, white, purple, black //manual copy of enum above. 
+    let colours: number[] = [0, 1, 2, 3, 4, 6];  //no black or white
+
+    /**
+     * Check if the colour sensor detected any custom colour
+     */
+    //%blockId=see_any_colour block="see any colour"
+    //% weight=97
+    //% group="Colour Sensor"
+    export function checkForAnyCustomColour(): boolean {
+        let found: boolean = false
+        let index = 0
+        while(index < colours.length)
+        {
+            if (seeCustomDebounced(colours[index]) == true){
+                found = true
+                index = colours.length
+            }
+            else{
+                index ++;
+            }
+
+        }
+        return found
+    }
 
     let lastDetectedColour = -1
     let colDetectionFreq = 0
@@ -360,7 +386,7 @@ namespace BitKit {
      * Check if the colour sensor detected a colour
      */
     //%blockId=i2c_db block="see colour db |%colour|"
-    //% weight=96
+    //% weight=98
     //% group="Colour Sensor"
 
     export function seeCustomDebounced(colour: CustomColours): boolean {
