@@ -25,7 +25,7 @@ namespace grid {
             lw = 55;
             rw = 200;
             BitKit.setMotormoduleSpeed(200, 200);
-            basic.pause(300);
+            basic.pause(375);
             while (!BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)){ //least overlap with outside white/colour overlap
                 BitKit.setMotormoduleSpeed(lw , rw);
             }
@@ -40,7 +40,7 @@ namespace grid {
             lw = 200;
             rw = 55;
             BitKit.setMotormoduleSpeed(200, 200);
-            basic.pause(300);
+            basic.pause(375);
             while (!BitKit.wasLinePositionTriggered(LinerEvent.Rightmost)){
                 BitKit.setMotormoduleSpeed(lw , rw);
             }
