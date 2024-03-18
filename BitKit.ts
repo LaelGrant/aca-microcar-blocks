@@ -58,14 +58,14 @@ enum LinerEvent {
     Lost = 2
 };
 
-enum MotorTpye {
+enum MotorType {
     //% block=servo
     Servo = 0x24,
     //% block=wheel
     Wheel = 0x28
 };
 
-enum SpeedTpye {
+enum SpeedType {
     //% block=slow
     Slow = 120,
     //% block=medium
@@ -74,7 +74,7 @@ enum SpeedTpye {
     Fast = 255
 };
 
-enum DirectionTpye {
+enum DirectionType {
     //% block=forward
     Forward = 1,
     //% block=backward
@@ -89,7 +89,7 @@ enum DirectionTpye {
     Anticlockwise = 6
 };
 
-enum MotionTpye {
+enum MotionType {
     //% block="random direction"
     Random = 0,
     //% block=automatically
@@ -112,47 +112,47 @@ namespace BitKit {
     //% blockId=motor_set_action block="go|%direction|at|%speed speed"
     //% weight=100
     //% group="Car"
-    export function setMotormoduleAction(direction: DirectionTpye, speed: SpeedTpye) {
+    export function setMotormoduleAction(direction: DirectionType, speed: SpeedType) {
         basic.pause(1);
         let data: Buffer = pins.createBuffer(5);
         data[0] = 0x01;
-        if (direction == DirectionTpye.Forward) {
+        if (direction == DirectionType.Forward) {
             data[1] = speed & 0xff;
             data[2] = (speed >> 8) & 0xff;
             data[3] = speed & 0xff;
             data[4] = (speed >> 8) & 0xff;
         }
-        else if (direction == DirectionTpye.Backward) {
+        else if (direction == DirectionType.Backward) {
             data[1] = (-speed) & 0xff;
             data[2] = ((-speed) >> 8) & 0xff;
             data[3] = (-speed) & 0xff;
             data[4] = ((-speed) >> 8) & 0xff;
         }
-        else if (direction == DirectionTpye.Left) {
+        else if (direction == DirectionType.Left) {
             data[1] = 0 & 0xff;
             data[2] = (0 >> 8) & 0xff;
             data[3] = speed & 0xff;
             data[4] = (speed >> 8) & 0xff;
         }
-        else if (direction == DirectionTpye.Right) {
+        else if (direction == DirectionType.Right) {
             data[1] = speed & 0xff;
             data[2] = (speed >> 8) & 0xff;
             data[3] = 0 & 0xff;
             data[4] = (0 >> 8) & 0xff;
         }
-        else if (direction == DirectionTpye.Clockwise) {
+        else if (direction == DirectionType.Clockwise) {
             data[1] = speed & 0xff;
             data[2] = (speed >> 8) & 0xff;
             data[3] = (-speed) & 0xff;
             data[4] = ((-speed) >> 8) & 0xff;
         }
-        else if (direction == DirectionTpye.Anticlockwise) {
+        else if (direction == DirectionType.Anticlockwise) {
             data[1] = (-speed) & 0xff;
             data[2] = ((-speed) >> 8) & 0xff;
             data[3] = speed & 0xff;
             data[4] = (speed >> 8) & 0xff;
         }
-        driver.i2cSendBytes(MotorTpye.Wheel, data);
+        driver.i2cSendBytes(MotorType.Wheel, data);
     }
 
     /**
@@ -182,7 +182,7 @@ namespace BitKit {
         data[2] = (left >> 8) & 0xff;
         data[3] = right & 0xff;
         data[4] = (right >> 8) & 0xff;
-        driver.i2cSendBytes(MotorTpye.Wheel, data);
+        driver.i2cSendBytes(MotorType.Wheel, data);
     }
 
     export let linerEventValue = 0;

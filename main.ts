@@ -25,7 +25,7 @@ namespace grid {
             lw = 55;
             rw = 200;
             BitKit.setMotormoduleSpeed(200, 200);
-            basic.pause(375);
+            basic.pause(375);  //give time to clear dot edge
             while (!BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)){ //least overlap with outside white/colour overlap
                 BitKit.setMotormoduleSpeed(lw , rw);
             }
@@ -33,7 +33,8 @@ namespace grid {
                 BitKit.setMotormoduleSpeed(lw , rw);
             }
             basic.pause(50)
-            BitKit.setMotormoduleSpeed(200, 200); //stop turning - necessary as line event only triggers on change, so otherwise line following continues until it adjusts... 
+            BitKit.setMotormoduleSpeed(200, 200); //stop turning - necessary as line event only triggers on change, 
+            // so otherwise turning continues until line sensor triggers inside sensor on line, and then adjusts back.  
         }
 
         if (direction == 2){ //right
@@ -50,18 +51,6 @@ namespace grid {
             basic.pause(50)
             BitKit.setMotormoduleSpeed(200, 200); //stop turning
         }
-
-        //if (direction != 3) {
-        //    BitKit.setMotormoduleSpeed(200, 200);
-        //    basic.pause(300);
-        //    BitKit.setMotormoduleSpeed(lw, rw);
-        //    driver.i2cSendByte(SensorType.Liner, 0x02);
-        //    let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
-        //    while (event != LinerEvent.Middle) {
-        //        driver.i2cSendByte(SensorType.Liner, 0x02);
-        //        event = driver.i2cReceiveByte(SensorType.Liner);
-        //    }
-        //}
 
         else if(direction == 3) { //going straight
             let foundLine = false;
@@ -87,50 +76,7 @@ namespace grid {
                 }
             }
         }   
-        //else {  //turning
-        //   BitKit.setMotormoduleSpeed(lw, rw); //drive forwards in a turn to clear dot
-        //    basic.pause(500);
-        //    driver.i2cSendByte(SensorType.Liner, 0x02);
-        //    let event = driver.i2cReceiveByte(SensorType.Liner); //move until you hit the DAL.DEVICE_PIN_DEFAULT_SERVO_CENTER sensor on line
-        //    while (event != LinerEvent.Middle) {
-        //        driver.i2cSendByte(SensorType.Liner, 0x02);
-        //        event = driver.i2cReceiveByte(SensorType.Liner);
-        //    }
-        //}
 
-    }
-
-    /**
-    * Continue Straight (over dot) until any line found
-    */
-    //% weight=95
-    //% block="go straight over dot"
-    //% group="Grid"
-    export function goOverDot() {
-        let foundLine = false;
-        while (BitKit.checkForAnyCustomColour()) { //Follow until lose the line / multiple triggered
-            BitKit.setMotormoduleSpeed(200,200); 
-            basic.pause(100);
-        }
-        while (!foundLine){ 
-            foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)
-            if (!foundLine) {
-                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Left)
-            }
-            if (!foundLine) {
-                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Middle)
-            }
-            if (!foundLine) {
-                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Right)
-            }
-            if (!foundLine) {
-                foundLine = BitKit.wasLinePositionTriggered(LinerEvent.Rightmost)
-            }
-            if (!foundLine) { 
-                BitKit.setMotormoduleSpeed(200,200); 
-                basic.pause(100); 
-            }
-        }
     }
 
     /**
@@ -144,15 +90,15 @@ namespace grid {
         while (foundDot == false) { //Follow until lose the line / multiple triggered
             while (!(BitKit.wasAllLinePosTriggered())) { //Follow until lose the line / multiple triggered
                 if (BitKit.wasLinePositionTriggered(LinerEvent.Middle)) {
-                    BitKit.setMotormoduleAction(DirectionTpye.Forward, SpeedTpye.Medium)
+                    BitKit.setMotormoduleAction(DirectionType.Forward, SpeedType.Medium)
                 } else if (BitKit.wasLinePositionTriggered(LinerEvent.Left)) {
-                    BitKit.setMotormoduleAction(DirectionTpye.Left, SpeedTpye.Medium)
+                    BitKit.setMotormoduleAction(DirectionType.Left, SpeedType.Medium)
                 } else if (BitKit.wasLinePositionTriggered(LinerEvent.Right)) {
-                    BitKit.setMotormoduleAction(DirectionTpye.Right, SpeedTpye.Medium)
+                    BitKit.setMotormoduleAction(DirectionType.Right, SpeedType.Medium)
                 } else if (BitKit.wasLinePositionTriggered(LinerEvent.Rightmost)) {
-                    BitKit.setMotormoduleAction(DirectionTpye.Right, SpeedTpye.Fast)
+                    BitKit.setMotormoduleAction(DirectionType.Right, SpeedType.Fast)
                 } else if (BitKit.wasLinePositionTriggered(LinerEvent.Leftmost)) {
-                    BitKit.setMotormoduleAction(DirectionTpye.Left, SpeedTpye.Fast)
+                    BitKit.setMotormoduleAction(DirectionType.Left, SpeedType.Fast)
                 }
             }
             //TODO - add in flag, and then check for line triggers and then colour to exit loop? 
