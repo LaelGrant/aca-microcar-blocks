@@ -23,6 +23,7 @@ enum ColorEvent {
     Other = 5
 };
 
+//colours expanded to also cover Auto 5 - LG
 enum CustomColours { //made by Penny
     //%block=red
     R,
@@ -287,77 +288,12 @@ namespace BitKit {
         return (data[0] + data[1] * 256 + data[2] * 65536);
     }
 
-    /**
-     * Check if the colour sensor detected a colour
-     */
-    //%blockId=i2c block="see colour |%colour|"
-    //% weight=96
-    //% group="Colour Sensor"
-    export function seeCustom(colour: CustomColours): boolean {
-        //separate colour channels
-        let col = getColor()
-        let r = col >>> 16
-        let g = (col & 0xFF00) >>> 8
-        let b = col & 0xFF
-
-        basic.pause(1)
-        //colour conversion to HSL
-        //adapted from https://gist.github.com/vahidk/05184faf3d92a0aa1b46aeaa93b07786
-        r /= 255; g /= 255; b /= 255;
-        let max = Math.max(Math.max(r, g), b);
-        let min = Math.min(Math.min(r, g), b);
-        let d = max - min;
-        let h;
-        if (d === 0) h = 0;
-        else if (max === r) h = (g - b) / d % 6;
-        else if (max === g) h = (b - r) / d + 2;
-        else if (max === b) h = (r - g) / d + 4;
-        let l = (min + max) / 2;
-        let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-        h *= 60
-        if (h < 0) h += 360 //fix wrap around
-
-        //colour identification
-        if (s > 0.3 && l > 0.15 && l < 0.95) { //don't bother if it's too grey or black
-            switch (colour) {
-                case CustomColours.R:
-                    if (h > 350 || h < 17 && l < 0.85 && s > 0.81) { //saturation high to prevent map bg being detected
-                        return true;
-                    }
-                    return false;
-                case CustomColours.G:
-                    if (h > 77 && h < 160) {
-                        return true;
-                    }
-                    return false;
-                case CustomColours.B:
-                    if (h > 160 && h < 265 && l < 0.85) { //blue bluer than red, green fires high
-                        return true;
-                    }
-                    return false;
-                case CustomColours.P:
-                    if (h > 265 && h < 350 && l < 0.85) { // both red and blue more than green by a bit
-                        return true;
-                    }
-                    return false;
-            }
-        }
-        //separate bit for white
-        if (colour == CustomColours.W && col > 16759431) { //almost white (FFBA87), might need to lower Rval
-            return true;
-        }
-        //separate bit for black    
-        if (colour == CustomColours.Bl && r * 255 < 0x10 && g * 255 < 0x10 && b * 255 < 0x10) {//all low light
-            return true;
-        }
-        return false;
-    }
 
     //red, orange, yellow, green, blue, white, purple, black //manual copy of enum above. 
     let colours: number[] = [0, 1, 2, 3, 4, 6];  //no black or white
 
     /**
-     * Check if the colour sensor detected any custom colour
+     * Check if the colour sensor detected any custom colour (NOT B/W)
      */
     //%blockId=see_any_colour block="see any colour"
     //% weight=97
@@ -367,7 +303,7 @@ namespace BitKit {
         let index = 0
         while(index < colours.length)
         {
-            if (seeCustomDebounced(colours[index]) == true){
+            if (seeCustom(colours[index]) == true){  //NOTE that this calls debounced colour check, which has a threshold of 6 sequential positives
                 found = true
                 index = colours.length
             }
@@ -383,15 +319,18 @@ namespace BitKit {
     let colDetectionFreq = 0
 
     /**
-     * Check if the colour sensor detected a colour
+     * Check if the colour sensor detected any of the custom colours
+     * Debounced by checking if the detected colour matches the previously 
+     * detected colour, and triggering positive once a threshold sequential positives is reached.
+     * Resets once a different colour is detected
      */
     //%blockId=i2c_db block="see colour db |%colour|"
     //% weight=98
     //% group="Colour Sensor"
 
-    export function seeCustomDebounced(colour: CustomColours): boolean {
-        let detectedColour = -1
-        let colDetThreshold = 6
+    export function seeCustom(colour: CustomColours): boolean {
+        let detectedColour = -1     //default to invalid colour
+        let colDetThreshold = 6    //min seq. sensor match before triggering positive return
         
         //separate colour channels
         let col = getColor()
@@ -399,7 +338,7 @@ namespace BitKit {
         let g = (col & 0xFF00) >>> 8
         let b = col & 0xFF
 
-        //basic.pause(1)
+        //basic.pause(1)  //debounced increases detection latency, so pause removed
         //colour conversion to HSL
         //adapted from https://gist.github.com/vahidk/05184faf3d92a0aa1b46aeaa93b07786
         r /= 255; g /= 255; b /= 255;
@@ -442,21 +381,21 @@ namespace BitKit {
             detectedColour = CustomColours.W;
         }
         //separate bit for black 
-        else if(s < 0.1 || l < 0.1){
+        else if(s < 0.1 || l < 0.1){  //should be accurate & a little more permissive for black detection
         //else if (colour == CustomColours.Bl && r * 255 < 0x10 && g * 255 < 0x10 && b * 255 < 0x10) {//all low light
             detectedColour = CustomColours.Bl;
         }
         //Debounce colour detection
-        if(detectedColour == lastDetectedColour){
+        if(detectedColour == lastDetectedColour){   //sensed same colour again, increment frequency
             colDetectionFreq += 1;
-            if (colDetectionFreq > colDetThreshold && detectedColour == colour ) {
+            if (colDetectionFreq > colDetThreshold && detectedColour == colour ) {  //check if it's actually what we're looking for
                 return true
             }
             else {
                 return false
             }
         }
-        else
+        else    //new colour detected, reset count
         {
             colDetectionFreq = 0
             lastDetectedColour = detectedColour

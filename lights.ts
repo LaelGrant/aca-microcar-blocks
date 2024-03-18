@@ -162,14 +162,7 @@ namespace lights {
     //% blockId=if_there_is_coral block="if there is coral, then show |%colour"
     //% group="Actions"
     export function IfThereIsCoral(colour: NewoPixelColors) {
-        //for (let index = 0; index < 2; index++) { //do it twice so it actually triggers
-        //    if (BitKit.wasColorTriggered(ColorEvent.R)) {
-        //        strip.showColor(colour)
-        //    }
-        //    basic.pause(250)
-        //}
-        //if (BitKit.wasColorTriggered(ColorEvent.R)) {
-        if (BitKit.seeCustomDebounced(CustomColours.R)) {
+        if (BitKit.seeCustom(CustomColours.R)) {
             strip.showColor(colour)
             basic.pause(250)
             clearAll()
